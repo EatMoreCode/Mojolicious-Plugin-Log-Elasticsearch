@@ -23,10 +23,9 @@ sub register {
                              method => $c->req->method,
                              time   => $dur };
 
-    $c->app->ua->get('http://www.google.com' => sub {
-      my ($ua, $tx) = @_;
-      warn "GOOGS $json" . $tx->res->body;
-    });
+    # $c->app->ua->put('http://localhost:9200/mojo/log', form stuff here $ => sub {
+      # my ($ua, $tx) = @_;
+    # });
   });
 }
 
