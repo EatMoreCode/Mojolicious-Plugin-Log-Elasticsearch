@@ -4,7 +4,7 @@ use Test::More;
 use Mojolicious::Lite;
 use Test::Mojo;
 
-plugin 'Log::Elasticsearch';
+plugin 'Log::Elasticsearch', { elasticsearch_url => 'http://localhost:5600', index => 'foo', type => 'bar' };
 
 get '/' => sub {
   my $c = shift;

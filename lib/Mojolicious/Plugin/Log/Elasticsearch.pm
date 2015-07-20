@@ -1,5 +1,7 @@
 package Mojolicious::Plugin::Log::Elasticsearch;
 
+# ABSTRACT: Mojolicious Plugin to log requests to an Elasticsearch instance
+
 use Mojo::Base 'Mojolicious::Plugin';
 
 use Time::HiRes qw/time/;
@@ -46,43 +48,49 @@ sub register {
                  code   => $c->res->code,
                  method => $c->req->method,
                  time   => $dur,
-                 # timestamp => $t,
-                 # _timestamp => $t,
     };
 
     my $url = "${es_url}/${index}/${type}/?timestamp=${t}";
     $c->app->ua->post($url, json => $data, sub {
       my ($ua, $tx) = @_;
       if (! $tx) {
-        $c->app->error("could not log to elasticsearch");
+        $c->app->log->warning("could not log to elasticsearch");
       }
-      elsif ($tx->res->code !~ /^20./) {
-        $c->app->error("could not log to elasticsearch - " . $tx->res->body);
+      elsif ($tx->res && $tx->res->code && $tx->res->code !~ /^20./) {
+        $c->app->log->warning("could not log to elasticsearch - " . $tx->res->body);
       }
     });
   });
 }
 
 1;
+
 __END__
 
 =encoding utf8
 
-=head1 NAME
-
-Mojolicious::Plugin::Log::Elasticsearch - Mojolicious Plugin
-
 =head1 SYNOPSIS
 
+  # Config for your elasticsearch instance
+  my $config = { elasticsearch_url => 'http://localhost:5600',
+                 index             => 'webapps', 
+                 type              => 'MyApp' };
+
   # Mojolicious
-  $self->plugin('Log::Elasticsearch');
+  $self->plugin('Log::Elasticsearch', $config);
 
   # Mojolicious::Lite
-  plugin 'Log::Elasticsearch';
+  plugin 'Log::Elasticsearch', $config;
 
 =head1 DESCRIPTION
 
-L<Mojolicious::Plugin::Log::Elasticsearch> is a L<Mojolicious> plugin.
+L<Mojolicious::Plugin::Log::Elasticsearch> logs all requests to your app to an elasticsearch
+instance, allowing you to retroactively slice and dice your application performance in 
+fascinating ways.
+
+After each request (via C<after_dispatch>), a non-blocking request is made to the elasticsearch
+system via Mojo::UserAgent. This should mean minimal application performance hit, but does mean you
+need to run under C<hypnotoad> or C<morbo> for the non-blocking request to work.
 
 =head1 METHODS
 
