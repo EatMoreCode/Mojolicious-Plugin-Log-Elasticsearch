@@ -2,6 +2,8 @@ Revision history for Mojolicious::Plugin::Log::Elasticsearch
 
 {{$NEXT}}
 
+  * Remove some dzil cruft
+
 1.152010  2015-07-20 23:26:29+09:30 Australia/Adelaide
 
   * Initial public version
