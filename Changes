@@ -1,0 +1,5 @@
+Revision history for Mojolicious::Plugin::Log::Elasticsearch
+
+{{$NEXT}}
+
+  * Initial public version
