@@ -2,7 +2,7 @@ Revision history for Mojolicious::Plugin::Log::Elasticsearch
 
 {{$NEXT}}
 
-  * Remove some dzil cruft
+  * Remove some dzil cruft and improve metadata
 
 1.152010  2015-07-20 23:26:29+09:30 Australia/Adelaide
 
