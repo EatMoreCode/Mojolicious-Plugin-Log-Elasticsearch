@@ -14,11 +14,14 @@ sub register {
   my $type  = $conf->{type}  || die "no elasticsearch type provided";
   my $es_url = $conf->{elasticsearch_url} || die "no elasticsearch url provided";
 
+  my $tx_c = $app->ua->put("${es_url}/${index}");
+
   my $index_meta = {
     $type => {
       "_timestamp" => { enabled => 1, store => 1 },
       "properties" => { 
-        'ip' => { 'type' => 'ip', 'store' => 1 },
+        'ip'   => { 'type' => 'ip', 'store' => 1 },
+        'path' => { 'type' => 'string',  index => 'not_analyzed' } ,
       }
     }
   };
