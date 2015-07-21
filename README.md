@@ -4,7 +4,7 @@ Mojolicious::Plugin::Log::Elasticsearch - Mojolicious Plugin to log requests to 
 
 # VERSION
 
-version 1.152020
+version 1.152021
 
 # SYNOPSIS
 
