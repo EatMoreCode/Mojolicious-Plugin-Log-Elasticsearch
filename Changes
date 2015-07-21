@@ -3,6 +3,7 @@ Revision history for Mojolicious::Plugin::Log::Elasticsearch
 {{$NEXT}}
 
   * Add TODO file
+  * Change examples to use the standard port number
 
 1.152020  2015-07-21 09:53:41+09:30 Australia/Adelaide
 
