@@ -83,10 +83,10 @@ sub register {
     $c->app->ua->post($url, json => $data, sub {
       my ($ua, $tx) = @_;
       if (! $tx) {
-        $c->app->log->warning("could not log to elasticsearch");
+        $c->app->log->warn("could not log to elasticsearch");
       }
       elsif ($tx->res && $tx->res->code && $tx->res->code !~ /^20./) {
-        $c->app->log->warning("could not log to elasticsearch - " . $tx->res->body);
+        $c->app->log->warn("could not log to elasticsearch - " . $tx->res->body);
       }
     });
   });
