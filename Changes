@@ -2,6 +2,8 @@ Revision history for Mojolicious::Plugin::Log::Elasticsearch
 
 {{$NEXT}}
 
+  * Add TODO file
+
 1.152020  2015-07-21 09:53:41+09:30 Australia/Adelaide
 
   * Remove some dzil cruft and improve metadata
