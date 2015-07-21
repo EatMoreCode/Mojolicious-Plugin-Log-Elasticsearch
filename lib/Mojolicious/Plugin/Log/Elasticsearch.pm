@@ -70,7 +70,7 @@ __END__
 =head1 SYNOPSIS
 
   # Config for your elasticsearch instance
-  my $config = { elasticsearch_url => 'http://localhost:5600',
+  my $config = { elasticsearch_url => 'http://localhost:9200',
                  index             => 'webapps', 
                  type              => 'MyApp' };
 
