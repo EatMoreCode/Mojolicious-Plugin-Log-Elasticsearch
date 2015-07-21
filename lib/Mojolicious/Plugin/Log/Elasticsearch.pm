@@ -7,8 +7,6 @@ use Mojo::Base 'Mojolicious::Plugin';
 use Time::HiRes qw/time/;
 use Mojo::JSON  qw/encode_json/;
 
-our $VERSION = '0.01';
-
 sub register {
   my ($self, $app, $conf) = @_;
 
@@ -92,6 +90,26 @@ After each request (via C<after_dispatch>), a non-blocking request is made to th
 system via Mojo::UserAgent. This should mean minimal application performance hit, but does mean you
 need to run under C<hypnotoad> or C<morbo> for the non-blocking request to work.
 
+The new Elasticsearch index is created if necessary when your application starts. The following
+data points will be logged each request:
+
+=over 4
+
+=item *  ip  - IP address of requestor
+
+=item *  path - request path
+
+=item *  code - HTTP code of response
+
+=item *  method - HTTP method of request
+
+=item *  time - the number of seconds the request took to process (internally, not accounting for network overheads)
+
+=back
+
+When the index is created, appropriate types are set for the 'ip' and 'path' fields - in particular
+the 'path' field is set to not_analyzed so that it will not be treated as tokens separated by '/'.
+
 =head1 METHODS
 
 L<Mojolicious::Plugin::Log::Elasticsearch> inherits all methods from
@@ -105,6 +123,6 @@ Register plugin in L<Mojolicious> application.
 
 =head1 SEE ALSO
 
-L<Mojolicious>, L<Mojolicious::Guides>, L<http://mojolicio.us>.
+L<Mojolicious>, L<Mojolicious::Guides>, L<http://mojolicio.us>, L<https://www.elastic.co>.
 
 =cut

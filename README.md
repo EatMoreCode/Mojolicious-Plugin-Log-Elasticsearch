@@ -4,7 +4,7 @@ Mojolicious::Plugin::Log::Elasticsearch - Mojolicious Plugin to log requests to 
 
 # VERSION
 
-version 1.152010
+version 1.152020
 
 # SYNOPSIS
 
@@ -29,6 +29,18 @@ After each request (via `after_dispatch`), a non-blocking request is made to the
 system via Mojo::UserAgent. This should mean minimal application performance hit, but does mean you
 need to run under `hypnotoad` or `morbo` for the non-blocking request to work.
 
+The new Elasticsearch index is created if necessary when your application starts. The following
+data points will be logged each request:
+
+- ip  - IP address of requestor
+- path - request path
+- code - HTTP code of response
+- method - HTTP method of request
+- time - the number of seconds the request took to process (internally, not accounting for network overheads)
+
+When the index is created, appropriate types are set for the 'ip' and 'path' fields - in particular
+the 'path' field is set to not\_analyzed so that it will not be treated as tokens separated by '/'.
+
 # METHODS
 
 [Mojolicious::Plugin::Log::Elasticsearch](https://metacpan.org/pod/Mojolicious::Plugin::Log::Elasticsearch) inherits all methods from
@@ -42,7 +54,7 @@ Register plugin in [Mojolicious](https://metacpan.org/pod/Mojolicious) applicati
 
 # SEE ALSO
 
-[Mojolicious](https://metacpan.org/pod/Mojolicious), [Mojolicious::Guides](https://metacpan.org/pod/Mojolicious::Guides), [http://mojolicio.us](http://mojolicio.us).
+[Mojolicious](https://metacpan.org/pod/Mojolicious), [Mojolicious::Guides](https://metacpan.org/pod/Mojolicious::Guides), [http://mojolicio.us](http://mojolicio.us), [https://www.elastic.co](https://www.elastic.co).
 
 # AUTHOR
 
