@@ -7,6 +7,8 @@ use Mojo::Base 'Mojolicious::Plugin';
 use Time::HiRes qw/time/;
 use Mojo::JSON  qw/encode_json/;
 
+our $geoip;
+
 sub register {
   my ($self, $app, $conf) = @_;
 
@@ -14,14 +16,20 @@ sub register {
   my $type  = $conf->{type}  || die "no elasticsearch type provided";
   my $es_url = $conf->{elasticsearch_url} || die "no elasticsearch url provided";
 
+  if ($conf->{geo_ip_citydb}) { 
+    require Geo::IP;
+    $geoip = Geo::IP->open($conf->{geo_ip_citydb});
+  }
+
   my $tx_c = $app->ua->put("${es_url}/${index}");
 
   my $index_meta = {
     $type => {
       "_timestamp" => { enabled => 1, store => 1 },
       "properties" => { 
-        'ip'   => { 'type' => 'ip', 'store' => 1 },
-        'path' => { 'type' => 'string',  index => 'not_analyzed' } ,
+        'ip'        => { 'type' => 'ip', 'store' => 1 },
+        'path'      => { 'type' => 'string',  index => 'not_analyzed' },
+        'location'  => { 'type' => 'geo_point' },
       }
     }
   };
@@ -40,12 +48,35 @@ sub register {
     my $t = sprintf("%04d-%02d-%02dT%02d:%02d:%02dZ", $n[5]+1900, $n[4]+1, $n[3],
                                                       @n[2,1,0]);
     my $dur = time() - $c->stash->{'mojolicious-plugin-log-elasticsearch.start'};
+
+    # perhaps look up Geo::IP stuff
+    my %geo_ip_data;
+    my ($lat, $long, $country_code);
+    eval {
+      return 1 if (! $geoip);
+      return 1 if (! $c->tx->remote_address);
+
+      my $rec = $geoip->record_by_addr($c->tx->remote_address);
+      my $rec = $geoip->record_by_addr('8.8.8.8');
+      return 1 if (! $rec);
+
+      $lat          = $rec->latitude;
+      $long         = $rec->longitude;
+      $country_code = $rec->country_code;
+
+      %geo_ip_data = ( location => { lat => $lat, long => $long }, country_code => $country_code );
+
+      1;
+    } or do {
+      $c->app->log->warn("could not lookup lat/long for ip: $@");
+    };
     
     my $data = { ip     => $c->tx->remote_address, 
                  path   => $c->req->url->to_abs->path, 
                  code   => $c->res->code,
                  method => $c->req->method,
                  time   => $dur,
+                 %geo_ip_data,
     };
 
     my $url = "${es_url}/${index}/${type}/?timestamp=${t}";
