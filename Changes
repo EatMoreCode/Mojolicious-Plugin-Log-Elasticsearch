@@ -2,6 +2,8 @@ Revision history for Mojolicious::Plugin::Log::Elasticsearch
 
 {{$NEXT}}
 
+1.152021  2015-07-21 21:02:06+09:30 Australia/Adelaide
+
   * Add TODO file
   * Change examples to use the standard port number
   * Geo::IP support for logging lat/long
