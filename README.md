@@ -9,9 +9,11 @@ version 1.152020
 # SYNOPSIS
 
     # Config for your elasticsearch instance
-    my $config = { elasticsearch_url => 'http://localhost:5600',
+    my $config = { elasticsearch_url => 'http://localhost:9200',
                    index             => 'webapps', 
-                   type              => 'MyApp' };
+                   type              => 'MyApp',
+                   geo_ip_citydb     => 'some/path/here.dat',  # optional
+    };
 
     # Mojolicious
     $self->plugin('Log::Elasticsearch', $config);
@@ -38,7 +40,16 @@ data points will be logged each request:
 - method - HTTP method of request
 - time - the number of seconds the request took to process (internally, not accounting for network overheads)
 
-When the index is created, appropriate types are set for the 'ip' and 'path' fields - in particular
+Additionally, if you supply a path to a copy of the GeoLiteCity.dat database file
+in the config key 'geo\_ip\_citydb', and have the [Geo::IP](https://metacpan.org/pod/Geo::IP) module installed, the
+following keys will also be submitted to Elasticsearch:
+
+- location - latitude and longitude of the city the IP address belongs to
+- country\_code - two letter country code of the country the IP address belongs to
+
+The city database can be obtained here: [http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz](http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz).
+
+When the index is created, appropriate types are set for the 'ip', 'path' and 'location' fields - in particular
 the 'path' field is set to not\_analyzed so that it will not be treated as tokens separated by '/'.
 
 # METHODS
