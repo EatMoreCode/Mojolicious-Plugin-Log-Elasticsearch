@@ -57,14 +57,13 @@ sub register {
       return 1 if (! $c->tx->remote_address);
 
       my $rec = $geoip->record_by_addr($c->tx->remote_address);
-      my $rec = $geoip->record_by_addr('8.8.8.8');
       return 1 if (! $rec);
 
       $lat          = $rec->latitude;
       $long         = $rec->longitude;
       $country_code = $rec->country_code;
 
-      %geo_ip_data = ( location => { lat => $lat, long => $long }, country_code => $country_code );
+      %geo_ip_data = ( location => "$lat, $long", country_code => $country_code );
 
       1;
     } or do {
