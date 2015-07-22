@@ -2,6 +2,8 @@ Revision history for Mojolicious::Plugin::Log::Elasticsearch
 
 {{$NEXT}}
 
+1.152031  2015-07-22 12:45:23+09:30 Australia/Adelaide
+
   * Add suggested Geo::IP dependency to metadata
 
 1.152030  2015-07-22 11:09:45+09:30 Australia/Adelaide
