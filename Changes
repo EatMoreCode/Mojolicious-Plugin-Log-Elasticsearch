@@ -4,6 +4,8 @@ Revision history for Mojolicious::Plugin::Log::Elasticsearch
 
 1.152030  2015-07-22 11:09:45+09:30 Australia/Adelaide
 
+  * Add support for arbitrary stash keys to also be sent to Elasticsearch
+
 1.152021  2015-07-21 21:02:06+09:30 Australia/Adelaide
 
   * Add TODO file
