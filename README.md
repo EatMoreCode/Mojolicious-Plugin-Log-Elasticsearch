@@ -4,7 +4,7 @@ Mojolicious::Plugin::Log::Elasticsearch - Mojolicious Plugin to log requests to 
 
 # VERSION
 
-version 1.152021
+version 1.152030
 
 # SYNOPSIS
 
@@ -13,6 +13,7 @@ version 1.152021
                    index             => 'webapps', 
                    type              => 'MyApp',
                    geo_ip_citydb     => 'some/path/here.dat',  # optional
+                   log_stash_keys    => [qw/foo bar baz/],     # optional
     };
 
     # Mojolicious
@@ -28,20 +29,20 @@ instance, allowing you to retroactively slice and dice your application performa
 fascinating ways.
 
 After each request (via `after_dispatch`), a non-blocking request is made to the elasticsearch
-system via Mojo::UserAgent. This should mean minimal application performance hit, but does mean you
+system via [Mojo::UserAgent](https://metacpan.org/pod/Mojo::UserAgent). This should mean minimal application performance hit, but does mean you
 need to run under `hypnotoad` or `morbo` for the non-blocking request to work.
 
 The new Elasticsearch index is created if necessary when your application starts. The following
 data points will be logged each request:
 
-- ip  - IP address of requestor
-- path - request path
-- code - HTTP code of response
-- method - HTTP method of request
-- time - the number of seconds the request took to process (internally, not accounting for network overheads)
+- `ip` - IP address of requestor
+- `path` - request path
+- `code` - HTTP code of response
+- `method` - HTTP method of request
+- `time` - the number of seconds the request took to process (internally, not accounting for network overheads)
 
 Additionally, if you supply a path to a copy of the GeoLiteCity.dat database file
-in the config key 'geo\_ip\_citydb', and have the [Geo::IP](https://metacpan.org/pod/Geo::IP) module installed, the
+in the config key '`geo_ip_citydb`', and have the [Geo::IP](https://metacpan.org/pod/Geo::IP) module installed, the
 following keys will also be submitted to Elasticsearch:
 
 - location - latitude and longitude of the city the IP address belongs to
@@ -49,8 +50,12 @@ following keys will also be submitted to Elasticsearch:
 
 The city database can be obtained here: [http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz](http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz).
 
-When the index is created, appropriate types are set for the 'ip', 'path' and 'location' fields - in particular
-the 'path' field is set to not\_analyzed so that it will not be treated as tokens separated by '/'.
+If you specify an arrayref of keys in the `log_stash_keys` configuration value, those
+corresponding values will be pulled from the request's stash (if present) and also
+sent to Elasticsearch.
+
+When the index is created, appropriate types are set for the '`ip`', '`path`' and '`location`' fields - in particular
+the '`path`' field is set to not\_analyzed so that it will not be treated as tokens separated by '/'.
 
 # METHODS
 

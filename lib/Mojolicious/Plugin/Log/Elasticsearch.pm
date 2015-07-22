@@ -7,20 +7,22 @@ use Mojo::Base 'Mojolicious::Plugin';
 use Time::HiRes qw/time/;
 use Mojo::JSON  qw/encode_json/;
 
-our $geoip;
-
 sub register {
   my ($self, $app, $conf) = @_;
 
   my $index = $conf->{index} || die "no elasticsearch index provided";
   my $type  = $conf->{type}  || die "no elasticsearch type provided";
   my $es_url = $conf->{elasticsearch_url} || die "no elasticsearch url provided";
+  my $log_stash_keys = $conf->{log_stash_keys} || [];
 
+  my $geoip;
   if ($conf->{geo_ip_citydb}) { 
     require Geo::IP;
     $geoip = Geo::IP->open($conf->{geo_ip_citydb});
   }
 
+  # We should be smarter and only create this index if it isn't already
+  # in existence. There's no harm here, it's just poor form.
   my $tx_c = $app->ua->put("${es_url}/${index}");
 
   my $index_meta = {
@@ -77,6 +79,9 @@ sub register {
                  time   => $dur,
                  %geo_ip_data,
     };
+    foreach (@{ $log_stash_keys}) {
+      $data->{$_} = $c->stash->{$_} if (exists $c->stash->{$_});
+    }
 
     my $url = "${es_url}/${index}/${type}/?timestamp=${t}";
     $c->app->ua->post($url, json => $data, sub {
@@ -104,6 +109,7 @@ __END__
                  index             => 'webapps', 
                  type              => 'MyApp',
                  geo_ip_citydb     => 'some/path/here.dat',  # optional
+                 log_stash_keys    => [qw/foo bar baz/],     # optional
   };
 
   # Mojolicious
@@ -119,7 +125,7 @@ instance, allowing you to retroactively slice and dice your application performa
 fascinating ways.
 
 After each request (via C<after_dispatch>), a non-blocking request is made to the elasticsearch
-system via Mojo::UserAgent. This should mean minimal application performance hit, but does mean you
+system via L<Mojo::UserAgent>. This should mean minimal application performance hit, but does mean you
 need to run under C<hypnotoad> or C<morbo> for the non-blocking request to work.
 
 The new Elasticsearch index is created if necessary when your application starts. The following
@@ -127,20 +133,20 @@ data points will be logged each request:
 
 =over 4
 
-=item *  ip  - IP address of requestor
+=item * C<ip> - IP address of requestor
 
-=item *  path - request path
+=item * C<path> - request path
 
-=item *  code - HTTP code of response
+=item * C<code> - HTTP code of response
 
-=item *  method - HTTP method of request
+=item * C<method> - HTTP method of request
 
-=item *  time - the number of seconds the request took to process (internally, not accounting for network overheads)
+=item * C<time> - the number of seconds the request took to process (internally, not accounting for network overheads)
 
 =back
 
 Additionally, if you supply a path to a copy of the GeoLiteCity.dat database file
-in the config key 'geo_ip_citydb', and have the L<Geo::IP> module installed, the
+in the config key 'C<geo_ip_citydb>', and have the L<Geo::IP> module installed, the
 following keys will also be submitted to Elasticsearch:
 
 =over 4
@@ -153,8 +159,12 @@ following keys will also be submitted to Elasticsearch:
 
 The city database can be obtained here: L<http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz>.
 
-When the index is created, appropriate types are set for the 'ip', 'path' and 'location' fields - in particular
-the 'path' field is set to not_analyzed so that it will not be treated as tokens separated by '/'.
+If you specify an arrayref of keys in the C<log_stash_keys> configuration value, those
+corresponding values will be pulled from the request's stash (if present) and also
+sent to Elasticsearch.
+
+When the index is created, appropriate types are set for the 'C<ip>', 'C<path>' and 'C<location>' fields - in particular
+the 'C<path>' field is set to not_analyzed so that it will not be treated as tokens separated by '/'.
 
 =head1 METHODS
 

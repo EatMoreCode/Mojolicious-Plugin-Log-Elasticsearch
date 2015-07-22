@@ -1,3 +1,2 @@
-* Improve tests so they do more than just show it compiles
 * Add more metrics?
-* Add user-defined (log stash contents) metrics
+* Don't try to create the index each time
