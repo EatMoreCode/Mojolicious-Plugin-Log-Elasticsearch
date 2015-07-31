@@ -14,6 +14,7 @@ sub register {
   my $type  = $conf->{type}  || die "no elasticsearch type provided";
   my $es_url = $conf->{elasticsearch_url} || die "no elasticsearch url provided";
   my $log_stash_keys = $conf->{log_stash_keys} || [];
+  my $extra_keys_sub = $conf->{extra_keys_hook};
 
   my $geoip;
   if ($conf->{geo_ip_citydb}) { 
@@ -83,6 +84,11 @@ sub register {
       $data->{$_} = $c->stash->{$_} if (exists $c->stash->{$_});
     }
 
+    if ($extra_keys_sub) {
+      my %new_values = $extra_keys_sub->($c);
+      $data = { %$data, %new_values };
+    }
+
     my $url = "${es_url}/${index}/${type}/?timestamp=${t}";
     $c->app->ua->post($url, json => $data, sub {
       my ($ua, $tx) = @_;
@@ -110,6 +116,7 @@ __END__
                  type              => 'MyApp',
                  geo_ip_citydb     => 'some/path/here.dat',  # optional
                  log_stash_keys    => [qw/foo bar baz/],     # optional
+                 extra_keys_hook   => sub { .. },            # optional
   };
 
   # Mojolicious
@@ -162,6 +169,12 @@ The city database can be obtained here: L<http://geolite.maxmind.com/download/ge
 If you specify an arrayref of keys in the C<log_stash_keys> configuration value, those
 corresponding values will be pulled from the request's stash (if present) and also
 sent to Elasticsearch.
+
+If you supply a coderef for the key C<extra_keys_hook>, that sub will be executed at
+end of each request. It will be passed a single argument, the request itself. It should
+return a hash, which contains extra key/value pairs which will go into the Elasticsearch
+index. These keys may override existing entries for that request - for example if you'd 
+like to override the path for some reason, you can do it here.
 
 When the index is created, appropriate types are set for the 'C<ip>', 'C<path>' and 'C<location>' fields - in particular
 the 'C<path>' field is set to not_analyzed so that it will not be treated as tokens separated by '/'.

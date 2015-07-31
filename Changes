@@ -2,6 +2,8 @@ Revision history for Mojolicious::Plugin::Log::Elasticsearch
 
 {{$NEXT}}
 
+  * Add a hook for running custom code to output/override other values
+
 1.152051  2015-07-24 16:55:10+09:30 Australia/Adelaide
 
   * Improve distribution with README.md
