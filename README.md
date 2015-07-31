@@ -14,6 +14,7 @@ version 1.152120
                    type              => 'MyApp',
                    geo_ip_citydb     => 'some/path/here.dat',  # optional
                    log_stash_keys    => [qw/foo bar baz/],     # optional
+                   extra_keys_hook   => sub { .. },            # optional
     };
 
     # Mojolicious
@@ -53,6 +54,12 @@ The city database can be obtained here: [http://geolite.maxmind.com/download/geo
 If you specify an arrayref of keys in the `log_stash_keys` configuration value, those
 corresponding values will be pulled from the request's stash (if present) and also
 sent to Elasticsearch.
+
+If you supply a coderef for the key `extra_keys_hook`, that sub will be executed at
+end of each request. It will be passed a single argument, the request itself. It should
+return a hash, which contains extra key/value pairs which will go into the Elasticsearch
+index. These keys may override existing entries for that request - for example if you'd 
+like to override the path for some reason, you can do it here.
 
 When the index is created, appropriate types are set for the '`ip`', '`path`' and '`location`' fields - in particular
 the '`path`' field is set to not\_analyzed so that it will not be treated as tokens separated by '/'.
