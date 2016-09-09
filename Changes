@@ -2,6 +2,11 @@ Revision history for Mojolicious::Plugin::Log::Elasticsearch
 
 {{$NEXT}}
 
+1.162530  2016-09-09 10:17:56+09:30 Australia/Adelaide
+
+  * Allow for specifying a timestamp field, since the automatic timestamps
+    have been removed in recent ElasticSearch
+
 1.152120  2015-07-31 17:02:34+09:30 Australia/Adelaide
 
   * Add a hook for running custom code to output/override other values
