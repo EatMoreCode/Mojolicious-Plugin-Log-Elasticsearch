@@ -92,7 +92,7 @@ Justin Hawkins <justin@eatmorecode.com>
 
 # COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2015 by Justin Hawkins.
+This software is copyright (c) 2016 by Justin Hawkins.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
