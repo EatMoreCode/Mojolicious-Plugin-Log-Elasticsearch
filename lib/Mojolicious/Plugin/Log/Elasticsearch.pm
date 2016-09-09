@@ -12,6 +12,7 @@ sub register {
 
   my $index = $conf->{index} || die "no elasticsearch index provided";
   my $type  = $conf->{type}  || die "no elasticsearch type provided";
+  my $ts_name = $conf->{timestamp_field};
   my $es_url = $conf->{elasticsearch_url} || die "no elasticsearch url provided";
   my $log_stash_keys = $conf->{log_stash_keys} || [];
   my $extra_keys_sub = $conf->{extra_keys_hook};
@@ -28,7 +29,8 @@ sub register {
 
   my $index_meta = {
     $type => {
-      "_timestamp" => { enabled => 1, store => 1 },
+      # let ES generate timestamps if they haven't specified a ts field name
+      ! $ts_name ? ("_timestamp" => { enabled => 1, store => 1 }) : (),
       "properties" => { 
         'ip'        => { 'type' => 'ip', 'store' => 1 },
         'path'      => { 'type' => 'string',  index => 'not_analyzed' },
@@ -78,6 +80,7 @@ sub register {
                  code   => $c->res->code,
                  method => $c->req->method,
                  time   => $dur,
+                 $ts_name ? ( $ts_name => int(time() * 1000) ) : (),
                  %geo_ip_data,
     };
     foreach (@{ $log_stash_keys}) {
@@ -114,6 +117,7 @@ __END__
   my $config = { elasticsearch_url => 'http://localhost:9200',
                  index             => 'webapps', 
                  type              => 'MyApp',
+                 timestamp_field   => 'timestamp',           # optional
                  geo_ip_citydb     => 'some/path/here.dat',  # optional
                  log_stash_keys    => [qw/foo bar baz/],     # optional
                  extra_keys_hook   => sub { .. },            # optional
@@ -165,6 +169,12 @@ following keys will also be submitted to Elasticsearch:
 =back
 
 The city database can be obtained here: L<http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz>.
+
+The optional C<timestamp_field> should be used if you'd like to have timestamps submitted
+with each entry using a defined name. If no C<timestamp_field> is specified, the elasticsearch
+index will be created with an automatic timestamp configuration. Note that that feature was 
+deprecated in recent versions of elasticsearch, if using a recent version you must specify
+this parameter.
 
 If you specify an arrayref of keys in the C<log_stash_keys> configuration value, those
 corresponding values will be pulled from the request's stash (if present) and also

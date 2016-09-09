@@ -4,7 +4,7 @@ Mojolicious::Plugin::Log::Elasticsearch - Mojolicious Plugin to log requests to 
 
 # VERSION
 
-version 1.152120
+version 1.162530
 
 # SYNOPSIS
 
@@ -12,6 +12,7 @@ version 1.152120
     my $config = { elasticsearch_url => 'http://localhost:9200',
                    index             => 'webapps', 
                    type              => 'MyApp',
+                   timestamp_field   => 'timestamp',           # optional
                    geo_ip_citydb     => 'some/path/here.dat',  # optional
                    log_stash_keys    => [qw/foo bar baz/],     # optional
                    extra_keys_hook   => sub { .. },            # optional
@@ -50,6 +51,12 @@ following keys will also be submitted to Elasticsearch:
 - country\_code - two letter country code of the country the IP address belongs to
 
 The city database can be obtained here: [http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz](http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz).
+
+The optional `timestamp_field` should be used if you'd like to have timestamps submitted
+with each entry using a defined name. If no `timestamp_field` is specified, the elasticsearch
+index will be created with an automatic timestamp configuration. Note that that feature was 
+deprecated in recent versions of elasticsearch, if using a recent version you must specify
+this parameter.
 
 If you specify an arrayref of keys in the `log_stash_keys` configuration value, those
 corresponding values will be pulled from the request's stash (if present) and also
